@@ -6,7 +6,7 @@ echo "INFO: ignore any 'dpkg-preconfigure: unable to re-open stdin' messages"
 # 		INSTALL git
 # ###############################
 # NB: librarian-puppet might need git installed. If it is not already installed
-# in your basebox, this will manually install it at this point using apt or yum
+# in your basebox, this will manually install it at this point using apt
 $(which git > /dev/null 2>&1)
 FOUND_GIT=$?
 if [ "$FOUND_GIT" -ne '0' ]; then
@@ -16,6 +16,22 @@ if [ "$FOUND_GIT" -ne '0' ]; then
   echo 'INFO: git installed.'
 else
   echo 'INFO: git found'
+fi
+
+
+# ###############################
+# 		UPDATE Puppet
+# ###############################
+echo "INFO: removing default puppet binaries"
+rm -f /opt/vagrant_ruby/bin/puppet*
+
+if [ ! -e /var/puppet-updated ]; then
+  echo "INFO: updating puppet to latest version"
+  wget -q -O /tmp/puppetlabs-release-precise.deb http://apt.puppetlabs.com/puppetlabs-release-precise.deb
+  dpkg -i /tmp/puppetlabs-release-precise.deb > /dev/null
+  apt-get update > /dev/null
+  apt-get -q -y install puppet > /dev/null
+  touch /var/puppet-updated
 fi
 
 
@@ -44,18 +60,9 @@ else
 fi
 
 
-# ###############################
-# 		UPDATE Puppet
-# ###############################
-# remove any existing puppet binaries
-echo "INFO: removing default puppet binaries"
-rm -f /opt/vagrant_ruby/bin/puppet*
-
-if [ ! -e /var/puppet-updated ]; then
-  echo "INFO: updating puppet to latest version"
-  wget -q -O /tmp/puppetlabs-release-precise.deb http://apt.puppetlabs.com/puppetlabs-release-precise.deb
-  dpkg -i /tmp/puppetlabs-release-precise.deb > /dev/null
-  apt-get update > /dev/null
-  apt-get -q -y install puppet > /dev/null
-  touch /var/puppet-updated
-fi
+# Print version information
+echo " ----------------------------- " 
+echo "INFO: `git --version`" 
+echo "INFO: puppet version `puppet --version`"
+echo "INFO: `librarian-puppet version`"
+echo " ----------------------------- " 
