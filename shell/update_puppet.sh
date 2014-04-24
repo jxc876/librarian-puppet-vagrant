@@ -8,5 +8,5 @@ if [ ! -e /var/puppet-updated ]; then
   wget -O /tmp/puppetlabs-release-precise.deb http://apt.puppetlabs.com/puppetlabs-release-precise.deb
   dpkg -i /tmp/puppetlabs-release-precise.deb
   apt-get --assume-yes install puppet
-  touch /tmp/puppet-updated
+  touch /var/puppet-updated
 fi
