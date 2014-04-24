@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "INFO: ignore any 'dpkg-preconfigure: unable to re-open stdin' messages"
+
 # ###############################
 # 		INSTALL git
 # ###############################
@@ -8,17 +10,17 @@
 $(which git > /dev/null 2>&1)
 FOUND_GIT=$?
 if [ "$FOUND_GIT" -ne '0' ]; then
-  echo 'Attempting to install git.'
-  apt-get -q -y update
-   apt-get -q -y install git
-   echo 'git installed.'
+  echo 'INFO: installing git'
+  apt-get -q -y update > /dev/null
+  apt-get -q -y install git > /dev/null
+  echo 'INFO: git installed.'
 else
-  echo 'git found.'
+  echo 'INFO: git found'
 fi
 
 
 # ###############################
-# 		copy Puppetfile
+# 		COPY Puppetfile
 # ###############################
 # Directory in which librarian-puppet should manage its modules directory
 PUPPET_DIR=/etc/puppet/
@@ -33,9 +35,27 @@ cp /vagrant/puppet/Puppetfile $PUPPET_DIR
 # 		INSTALL librarian-puppet
 # ###############################
 if [ "$(gem search -i librarian-puppet)" = "false" ]; then
-  gem install librarian-puppet
+  echo "INFO: installing librarian-puppet"
+  gem install librarian-puppet > /dev/null
   cd $PUPPET_DIR && librarian-puppet install --clean
 else
+  echo "INFO: librarian-puppet already installed"
   cd $PUPPET_DIR && librarian-puppet update
 fi
 
+
+# ###############################
+# 		UPDATE Puppet
+# ###############################
+# remove any existing puppet binaries
+echo "INFO: removing default puppet binaries"
+rm -f /opt/vagrant_ruby/bin/puppet*
+
+if [ ! -e /var/puppet-updated ]; then
+  echo "INFO: updating puppet to latest version"
+  wget -q -O /tmp/puppetlabs-release-precise.deb http://apt.puppetlabs.com/puppetlabs-release-precise.deb
+  dpkg -i /tmp/puppetlabs-release-precise.deb > /dev/null
+  apt-get update > /dev/null
+  apt-get -q -y install puppet > /dev/null
+  touch /var/puppet-updated
+fi
