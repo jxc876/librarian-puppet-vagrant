@@ -59,6 +59,16 @@ else
   cd $PUPPET_DIR && librarian-puppet update
 fi
 
+# ###############################
+# 		ssh keys
+# ###############################
+KeySource=/vagrant/ssh/id_rsa
+KeyDestination=/home/vagrant/.ssh/id_rsa
+if [ -s $KeySource ]; then
+	cp $KeySource $KeyDestination
+	chmod 600 $KeyDestination
+	chown vagrant:vagrant $KeyDestination
+fi
 
 # Print version information
 echo " ----------------------------- " 

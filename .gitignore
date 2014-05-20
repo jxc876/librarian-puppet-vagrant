@@ -1,0 +1,4 @@
+.vagrant
+
+#ignore any private ssh keys
+ssh/id_rsa
