@@ -63,13 +63,20 @@ fi
 # ###############################
 # 		ssh keys
 # ###############################
+# Give 1 copy to vagrant & 1 to root
 KeySource=/vagrant/ssh/id_rsa
-KeyDestination=/home/vagrant/.ssh/id_rsa
+KeyDestination1=/home/vagrant/.ssh/id_rsa
+KeyDestination2=/root/.ssh/id_rsa
 if [ -s $KeySource ]; then
 	echo "INFO: copying ssh key"
-	cp $KeySource $KeyDestination
-	chmod 600 $KeyDestination
-	chown vagrant:vagrant $KeyDestination
+	cp $KeySource $KeyDestination1
+	chown vagrant:vagrant $KeyDestination1 
+
+	mkdir -p /root/.ssh && chmod 700 /root/.ssh
+	cp $KeySource $KeyDestination2	
+	chown root:root $KeyDestination2
+
+	chmod 600 $KeyDestination1 $KeyDestination2	
 fi
 
 # Print version information
