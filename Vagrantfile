@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
   #                 BASE BOX
   # ####################################################
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "hashicorp/precise64"
+  config.vm.box = "puppetlabs/ubuntu-12.04-64-puppet"
   
 
   # ###################################################
@@ -78,16 +78,22 @@ Vagrant.configure("2") do |config|
     vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
   end
 
+  # ###################################################
+  #                 SHELL
+  # ####################################################
   # This shell provisioner installs librarian-puppet and runs it to install
   # puppet modules. This has to be done before the puppet provisioning so that
   # the modules are available when puppet tries to parse its manifests.
   config.vm.provision :shell, :path => "shell/main.sh"
 
+  # ###################################################
+  #                 PUPPET
+  # ####################################################
   # Now run the puppet provisioner. Note that the modules directory is entirely
   # managed by librarian-puppet
-  config.vm.provision :puppet do |puppet|
-    puppet.manifests_path = "puppet/manifests"
-    puppet.manifest_file  = "main.pp"
-  end
+  # config.vm.provision :puppet do |puppet|
+  #  puppet.manifests_path = "puppet/manifests"
+  #  puppet.manifest_file  = "main.pp"
+  # end
 
 end

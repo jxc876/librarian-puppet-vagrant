@@ -2,6 +2,9 @@
 
 echo "INFO: ignore any 'dpkg-preconfigure: unable to re-open stdin' messages"
 
+# apt-get -q -y update > /dev/null
+
+
 # ###############################
 # 		INSTALL git
 # ###############################
@@ -11,29 +14,11 @@ $(which git > /dev/null 2>&1)
 FOUND_GIT=$?
 if [ "$FOUND_GIT" -ne '0' ]; then
   echo 'INFO: installing git'
-  apt-get -q -y update > /dev/null
   apt-get -q -y install git > /dev/null
   echo 'INFO: git installed.'
 else
   echo 'INFO: git found'
 fi
-
-
-# ###############################
-# 		UPDATE Puppet
-# ###############################
-echo "INFO: removing default puppet binaries"
-rm -f /opt/vagrant_ruby/bin/puppet*
-
-if [ ! -e /var/puppet-updated ]; then
-  echo "INFO: updating puppet to latest version"
-  wget -q -O /tmp/puppetlabs-release-precise.deb http://apt.puppetlabs.com/puppetlabs-release-precise.deb
-  dpkg -i /tmp/puppetlabs-release-precise.deb > /dev/null
-  apt-get update > /dev/null
-  apt-get -q -y install puppet > /dev/null
-  touch /var/puppet-updated
-fi
-
 
 # ###############################
 # 		COPY Puppetfile
@@ -48,14 +33,30 @@ cp /vagrant/puppet/Puppetfile $PUPPET_DIR
 
 
 # ###############################
+# 		INSTALL ruby gems
+# ###############################
+$(which gem > /dev/null 2>&1)
+FOUND_GEM=$?
+if [ "$FOUND_GEM" -ne '0' ]; then
+  echo 'INFO: installing rubygems'
+  apt-get -q -y install rubygems > /dev/null
+  echo 'INFO: rubygems installed.'
+else
+  echo 'INFO: rubygems found'
+fi
+
+
+# ###############################
 # 		INSTALL librarian-puppet
 # ###############################
 if [ "$(gem search -i librarian-puppet)" = "false" ]; then
   echo "INFO: installing librarian-puppet"
   gem install librarian-puppet > /dev/null
+  echo "INFO: librarian-puppet fetching modules..."
   cd $PUPPET_DIR && librarian-puppet install --clean
 else
   echo "INFO: librarian-puppet already installed"
+  echo "INFO: fetching modules updates..."
   cd $PUPPET_DIR && librarian-puppet update
 fi
 
@@ -65,6 +66,7 @@ fi
 KeySource=/vagrant/ssh/id_rsa
 KeyDestination=/home/vagrant/.ssh/id_rsa
 if [ -s $KeySource ]; then
+	echo "INFO: copying ssh key"
 	cp $KeySource $KeyDestination
 	chmod 600 $KeyDestination
 	chown vagrant:vagrant $KeyDestination
