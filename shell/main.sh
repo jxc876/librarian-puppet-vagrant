@@ -2,7 +2,8 @@
 
 echo "INFO: ignore any 'dpkg-preconfigure: unable to re-open stdin' messages"
 
-# apt-get -q -y update > /dev/null
+echo "INFO: fetching apt-get updates..."
+apt-get -q -y update > /dev/null
 
 
 # ###############################
@@ -18,46 +19,6 @@ if [ "$FOUND_GIT" -ne '0' ]; then
   echo 'INFO: git installed.'
 else
   echo 'INFO: git found'
-fi
-
-# ###############################
-# 		COPY Puppetfile
-# ###############################
-# Directory in which librarian-puppet should manage its modules directory
-PUPPET_DIR=/etc/puppet/
-
-if [ ! -d "$PUPPET_DIR" ]; then
-  mkdir -p $PUPPET_DIR
-fi
-cp /vagrant/puppet/Puppetfile $PUPPET_DIR
-
-
-# ###############################
-# 		INSTALL ruby gems
-# ###############################
-$(which gem > /dev/null 2>&1)
-FOUND_GEM=$?
-if [ "$FOUND_GEM" -ne '0' ]; then
-  echo 'INFO: installing rubygems'
-  apt-get -q -y install rubygems > /dev/null
-  echo 'INFO: rubygems installed.'
-else
-  echo 'INFO: rubygems found'
-fi
-
-
-# ###############################
-# 		INSTALL librarian-puppet
-# ###############################
-if [ "$(gem search -i librarian-puppet)" = "false" ]; then
-  echo "INFO: installing librarian-puppet"
-  gem install librarian-puppet > /dev/null
-  echo "INFO: librarian-puppet fetching modules..."
-  cd $PUPPET_DIR && librarian-puppet install --clean
-else
-  echo "INFO: librarian-puppet already installed"
-  echo "INFO: fetching modules updates..."
-  cd $PUPPET_DIR && librarian-puppet update
 fi
 
 # ###############################
@@ -77,11 +38,55 @@ if [ -s $KeySource ]; then
 	chown root:root $KeyDestination2
 
 	chmod 600 $KeyDestination1 $KeyDestination2	
+else
+	echo "INFO: no ssh keys found"
 fi
 
-# Print version information
+# ###############################
+# 		INSTALL ruby gems
+# ###############################
+$(which gem > /dev/null 2>&1)
+FOUND_GEM=$?
+if [ "$FOUND_GEM" -ne '0' ]; then
+  echo 'INFO: installing rubygems'
+  apt-get -q -y install rubygems > /dev/null
+  echo 'INFO: rubygems installed.'
+else
+  echo 'INFO: rubygems found'
+fi
+
+# ###############################
+# 		COPY Puppetfile
+# ###############################
+# Directory in which librarian-puppet should manage its modules directory
+PUPPET_DIR=/etc/puppet/
+
+if [ ! -d "$PUPPET_DIR" ]; then
+  mkdir -p $PUPPET_DIR
+fi
+cp /vagrant/puppet/Puppetfile $PUPPET_DIR
+
+
+# ###############################
+# 		INSTALL & RUN librarian-puppet
+# ###############################
+if [ "$(gem search -i librarian-puppet)" = "false" ]; then
+  echo "INFO: installing librarian-puppet"
+  gem install rdoc librarian-puppet > /dev/null
+  echo "INFO: librarian-puppet fetching modules..."
+  cd $PUPPET_DIR && librarian-puppet install --clean
+else
+  echo "INFO: librarian-puppet already installed"
+  echo "INFO: fetching modules updates..."
+  cd $PUPPET_DIR && librarian-puppet update
+fi
+
+# ###############################
+# Done! Print version information
+# ###############################
 echo " ----------------------------- " 
 echo "INFO: `git --version`" 
+echo "INFO: `ruby --version | cut -d' ' -f1,2`"
 echo "INFO: puppet version `puppet --version`"
 echo "INFO: `librarian-puppet version`"
 echo " ----------------------------- " 
