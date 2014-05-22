@@ -38,12 +38,13 @@ cp /vagrant/puppet/Puppetfile $PUPPET_DIR
 # ###############################
 # 		RUN librarian-puppet
 # ###############################
-if [ "$(gem search -i librarian-puppet)" = "false" ]; then
-  echo "INFO: librarian-puppet install..."
-  cd $PUPPET_DIR && librarian-puppet install --clean
+cd $PUPPET_DIR 
+if [ -f /etc/puppet/Puppetfile.lock ]; then
+  echo "INFO: librarian-puppet update"
+  librarian-puppet update
 else
-  echo "INFO: librarian-puppet update..."
-  cd $PUPPET_DIR && librarian-puppet update
+  echo "INFO: librarian-puppet install"
+  librarian-puppet install --clean
 fi
 
 # ###############################
