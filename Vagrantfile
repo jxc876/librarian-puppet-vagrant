@@ -12,6 +12,11 @@ Vagrant.configure("2") do |config|
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "jxc876/ubuntu-puppet"
   
+  # The hostname the machine should have, will be set on boot
+  config.vm.hostname = "vagrant"
+  
+  # A message to show after vagrant up
+  # config.vm.post_up_message
 
   # ###################################################
   #                 FOWARDED PORTS
@@ -54,32 +59,19 @@ Vagrant.configure("2") do |config|
   # ####################################################
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
-  # Example for VirtualBox:
-  #
-  # config.vm.provider :virtualbox do |vb|
-  #   # Don't boot with headless mode
-  #   vb.gui = true
-  #
-  #   # Use VBoxManage to customize the VM. For example to change memory:
-  #   vb.customize ["modifyvm", :id, "--memory", "1024"]
-  # end
-  #
-  # View the documentation for the provider you're using for more
-  # information on available options.
-
-  
-  # ###################################################
-  #                 PROVISION
-  # ####################################################
   config.vm.provider :virtualbox do |vb|
     # This allows symlinks to be created within the /vagrant root directory, 
     # which is something librarian-puppet needs to be able to do. This might
     # be enabled by default depending on what version of VirtualBox is used.
     vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
+	vb.name = "vagrant_vm"
+	# vb.gui = true
+	# vb.customize ["modifyvm", :id, "--memory", "1024"]
   end
+  
 
   # ###################################################
-  #                 SHELL
+  #                PROVISION - SHELL
   # ####################################################
   # This shell provisioner installs librarian-puppet and runs it to install
   # puppet modules. This has to be done before the puppet provisioning so that
@@ -87,7 +79,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, :path => "shell/main.sh"
 
   # ###################################################
-  #                 PUPPET
+  #                PROVISION - PUPPET
   # ####################################################
   # Now run the puppet provisioner. Note that the modules directory is entirely
   # managed by librarian-puppet
