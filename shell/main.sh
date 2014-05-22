@@ -22,27 +22,6 @@ else
 fi
 
 # ###############################
-# 		ssh keys
-# ###############################
-# Give 1 copy to vagrant & 1 to root
-KeySource=/vagrant/ssh/id_rsa
-KeyDestination1=/home/vagrant/.ssh/id_rsa
-KeyDestination2=/root/.ssh/id_rsa
-if [ -s $KeySource ]; then
-	echo "INFO: copying ssh key"
-	cp $KeySource $KeyDestination1
-	chown vagrant:vagrant $KeyDestination1 
-
-	mkdir -p /root/.ssh && chmod 700 /root/.ssh
-	cp $KeySource $KeyDestination2	
-	chown root:root $KeyDestination2
-
-	chmod 600 $KeyDestination1 $KeyDestination2	
-else
-	echo "INFO: no ssh keys found"
-fi
-
-# ###############################
 # 		INSTALL ruby gems
 # ###############################
 $(which gem > /dev/null 2>&1)
@@ -56,29 +35,13 @@ else
 fi
 
 # ###############################
-# 		COPY Puppetfile
-# ###############################
-# Directory in which librarian-puppet should manage its modules directory
-PUPPET_DIR=/etc/puppet/
-
-if [ ! -d "$PUPPET_DIR" ]; then
-  mkdir -p $PUPPET_DIR
-fi
-cp /vagrant/puppet/Puppetfile $PUPPET_DIR
-
-
-# ###############################
 # 		INSTALL & RUN librarian-puppet
 # ###############################
 if [ "$(gem search -i librarian-puppet)" = "false" ]; then
   echo "INFO: installing librarian-puppet"
   gem install rdoc librarian-puppet > /dev/null
-  echo "INFO: librarian-puppet fetching modules..."
-  cd $PUPPET_DIR && librarian-puppet install --clean
 else
   echo "INFO: librarian-puppet already installed"
-  echo "INFO: fetching modules updates..."
-  cd $PUPPET_DIR && librarian-puppet update
 fi
 
 # ###############################
