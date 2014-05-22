@@ -1,29 +1,9 @@
 #!/bin/sh
 
-echo "INFO: ignore any 'dpkg-preconfigure: unable to re-open stdin' messages"
-
-echo "INFO: fetching apt-get updates..."
-apt-get -q -y update > /dev/null
-
-
-# ###############################
-# 		INSTALL git
-# ###############################
-# NB: librarian-puppet might need git installed. If it is not already installed
-# in your basebox, this will manually install it at this point using apt
-$(which git > /dev/null 2>&1)
-FOUND_GIT=$?
-if [ "$FOUND_GIT" -ne '0' ]; then
-  echo 'INFO: installing git'
-  apt-get -q -y install git > /dev/null
-  echo 'INFO: git installed.'
-else
-  echo 'INFO: git found'
-fi
-
 # ###############################
 # 		ssh keys
 # ###############################
+# Copy any `id_rsa` file in ssh folder
 # Give 1 copy to vagrant & 1 to root
 KeySource=/vagrant/ssh/id_rsa
 KeyDestination1=/home/vagrant/.ssh/id_rsa
@@ -42,18 +22,6 @@ else
 	echo "INFO: no ssh keys found"
 fi
 
-# ###############################
-# 		INSTALL ruby gems
-# ###############################
-$(which gem > /dev/null 2>&1)
-FOUND_GEM=$?
-if [ "$FOUND_GEM" -ne '0' ]; then
-  echo 'INFO: installing rubygems'
-  apt-get -q -y install rubygems > /dev/null
-  echo 'INFO: rubygems installed.'
-else
-  echo 'INFO: rubygems found'
-fi
 
 # ###############################
 # 		COPY Puppetfile
@@ -68,16 +36,13 @@ cp /vagrant/puppet/Puppetfile $PUPPET_DIR
 
 
 # ###############################
-# 		INSTALL & RUN librarian-puppet
+# 		RUN librarian-puppet
 # ###############################
 if [ "$(gem search -i librarian-puppet)" = "false" ]; then
-  echo "INFO: installing librarian-puppet"
-  gem install rdoc librarian-puppet > /dev/null
-  echo "INFO: librarian-puppet fetching modules..."
+  echo "INFO: librarian-puppet install..."
   cd $PUPPET_DIR && librarian-puppet install --clean
 else
-  echo "INFO: librarian-puppet already installed"
-  echo "INFO: fetching modules updates..."
+  echo "INFO: librarian-puppet update..."
   cd $PUPPET_DIR && librarian-puppet update
 fi
 

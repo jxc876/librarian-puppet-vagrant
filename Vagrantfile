@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
   #                 BASE BOX
   # ####################################################
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "puppetlabs/ubuntu-12.04-64-puppet"
+  config.vm.box = "jxc876/ubuntu-puppet"
   
 
   # ###################################################
