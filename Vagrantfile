@@ -66,7 +66,8 @@ Vagrant.configure("2") do |config|
     vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
 	vb.name = "vagrant_vm"
 	# vb.gui = true
-	# vb.customize ["modifyvm", :id, "--memory", "1024"]
+	# vb.memory = "1024"
+	# vb.cpus = "2"
   end
   
 
